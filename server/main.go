@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
-	"google.golang.org/grpc"
 	pb "github.com/emreturgutce/hello-grpc/proto"
+	"google.golang.org/grpc"
 	"log"
 	"net"
 )
 
-type server struct {}
+type server struct {
+	pb.UnimplementedGreeterServiceServer
+}
 
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	log.Printf("Received: %v", in.GetName())
@@ -23,4 +25,10 @@ func main() {
 	}
 
 	s := grpc.NewServer()
+
+	pb.RegisterGreeterServiceServer(s, &server{})
+
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("Failed to serve: %v", err)
+	}
 }
